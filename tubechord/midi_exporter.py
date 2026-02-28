@@ -4,13 +4,15 @@ from midiutil import MIDIFile
 
 from tubechord.voicing_strategy import VoicedChord
 
-# Track indices
-TRACK_LH = 0  # Left Hand  / Bass  (Channel 0)
-TRACK_RH = 1  # Right Hand / Chords (Channel 1)
+# Track indices — Track 0 is the primary track; notation apps (GarageBand,
+# MuseScore) render it as the top staff (treble clef). Track 1 becomes the
+# bottom staff (bass clef). Standard piano MIDI convention: RH first.
+TRACK_RH = 0  # Right Hand / Chords — top staff  → treble clef
+TRACK_LH = 1  # Left Hand  / Bass   — bottom staff → bass clef
 
 # General MIDI channel assignments
-CHANNEL_LH = 0
-CHANNEL_RH = 1
+CHANNEL_RH = 0
+CHANNEL_LH = 1
 
 
 class MidiExporter:
@@ -19,14 +21,14 @@ class MidiExporter:
 
     Track layout
     ------------
-    Track 0 — "Left Hand (Bass)"
+    Track 0 — "Right Hand (Chords)"  →  top staff / treble clef
+        Contains the three-note triad produced by the VoicingStrategy.
+        Both grade levels populate this track.
+
+    Track 1 — "Left Hand (Bass)"  →  bottom staff / bass clef
         Contains the left-hand bass note(s) produced by the VoicingStrategy.
         For Grade 1 this track is empty; for Grade 2 it holds the root note
         one octave below the right-hand triad.
-
-    Track 1 — "Right Hand (Chords)"
-        Contains the three-note triad produced by the VoicingStrategy.
-        Both grade levels populate this track.
 
     This separation lets students mute one track in any standard MIDI player
     (GarageBand, MuseScore, etc.) to practise a single hand in isolation.
@@ -79,13 +81,13 @@ class MidiExporter:
         """
         midi = MIDIFile(numTracks=2, removeDuplicates=False, deinterleave=False)
 
-        # --- Track 0: Left Hand ---
-        midi.addTrackName(TRACK_LH, 0, "Left Hand (Bass)")
-        midi.addTempo(TRACK_LH, 0, self.tempo)
-
-        # --- Track 1: Right Hand ---
+        # --- Track 0: Right Hand (treble clef / top staff) ---
         midi.addTrackName(TRACK_RH, 0, "Right Hand (Chords)")
         midi.addTempo(TRACK_RH, 0, self.tempo)
+
+        # --- Track 1: Left Hand (bass clef / bottom staff) ---
+        midi.addTrackName(TRACK_LH, 0, "Left Hand (Bass)")
+        midi.addTempo(TRACK_LH, 0, self.tempo)
 
         for vc in voiced_chords:
             start_beat = self._seconds_to_beats(vc.event.start_time)
