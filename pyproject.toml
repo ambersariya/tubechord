@@ -13,6 +13,8 @@ dependencies = [
     "midiutil>=1.2.1,<2.0.0",
     "numpy>=1.24.0",
     "scipy>=1.10.0",
+    "music21>=9.0.0,<10.0.0",
+    "verovio>=5.0.0",
 ]
 
 [project.scripts]
@@ -42,3 +44,8 @@ known-first-party = ["tubechord"]
 python_version = "3.10"
 strict = true
 ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+markers = [
+    "integration: tests that require real MIDI files and heavy dependencies (deselect with -m 'not integration')",
+]

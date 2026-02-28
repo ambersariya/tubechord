@@ -2,6 +2,7 @@
 
 import re
 import sys
+from pathlib import Path
 
 import click
 
@@ -32,7 +33,17 @@ def _title_to_filename(title: str) -> str:
     return f"{sanitized}.mid"
 
 
-@click.command(context_settings={"help_option_names": ["-h", "--help"]})
+# ── CLI group ──────────────────────────────────────────────────────────────────
+
+@click.group(context_settings={"help_option_names": ["-h", "--help"]})
+@click.version_option(version=__version__, prog_name="tubechord")
+def main() -> None:
+    """TubeChord — YouTube chord extractor and sheet music generator."""
+
+
+# ── extract subcommand ─────────────────────────────────────────────────────────
+
+@main.command()
 @click.argument("url")
 @click.option(
     "--grade",
@@ -70,18 +81,17 @@ def _title_to_filename(title: str) -> str:
         "Increase (e.g. 1.0) for noisy audio or complex harmonies."
     ),
 )
-@click.version_option(version=__version__, prog_name="tubechord")
-def main(url: str, grade: int, output: str | None, tempo: int, min_duration: float) -> None:
+def extract(url: str, grade: int, output: str | None, tempo: int, min_duration: float) -> None:
     """
-    TubeChord — extract piano chords from a YouTube video and save them as MIDI.
+    Extract piano chords from a YouTube video and save them as MIDI.
 
     URL is the YouTube video to analyse (wrap in quotes if it contains &).
 
     \b
     Examples:
-      tubechord "https://youtu.be/dQw4w9WgXcQ" --grade 1
-      tubechord "https://youtu.be/dQw4w9WgXcQ" --grade 2 -o my_song.mid
-      tubechord "https://youtu.be/dQw4w9WgXcQ" --grade 2 --tempo 60 --min-duration 1.0
+      tubechord extract "https://youtu.be/dQw4w9WgXcQ" --grade 1
+      tubechord extract "https://youtu.be/dQw4w9WgXcQ" --grade 2 -o my_song.mid
+      tubechord extract "https://youtu.be/dQw4w9WgXcQ" --grade 2 --tempo 60 --min-duration 1.0
     """
     voicer = _get_voicer(grade)
 
@@ -149,3 +159,63 @@ def main(url: str, grade: int, output: str | None, tempo: int, min_duration: flo
 
     click.echo()
     click.echo(f"Done!  Open '{output}' in GarageBand, MuseScore, or any MIDI player.")
+
+
+# ── sheet subcommand ───────────────────────────────────────────────────────────
+
+@main.command()
+@click.argument("midi_file", type=click.Path(exists=True, dir_okay=False, readable=True))
+@click.option(
+    "--output",
+    "-o",
+    default=None,
+    metavar="PATH",
+    help="Destination HTML file path. Defaults to <MIDI_FILE stem>.html.",
+)
+@click.option(
+    "--title",
+    default=None,
+    metavar="TEXT",
+    help="Title shown in the HTML header. Defaults to the MIDI filename stem.",
+)
+def sheet(midi_file: str, output: str | None, title: str | None) -> None:
+    """
+    Render a MIDI file as a self-contained HTML file with SVG sheet music.
+
+    MIDI_FILE is the path to an existing .mid file. Open the resulting HTML
+    in any browser to view the score; use the browser's Print dialog to export
+    as PDF.
+
+    \b
+    Examples:
+      tubechord sheet my_song.mid
+      tubechord sheet my_song.mid -o score.html --title "My Song"
+    """
+    from tubechord.sheet_exporter import SheetExporter
+
+    midi_path = Path(midi_file)
+    resolved_title = title if title is not None else midi_path.stem.replace("_", " ")
+    resolved_output = output if output is not None else str(midi_path.with_suffix(".html"))
+
+    click.echo(f"tubechord v{__version__}")
+    click.echo(f"  MIDI   : {midi_file}")
+    click.echo(f"  Title  : {resolved_title}")
+    click.echo(f"  Output : {resolved_output}")
+    click.echo()
+
+    click.echo("[1/3] Parsing MIDI with music21...")
+    click.echo("[2/3] Rendering notation to SVG with verovio...")
+    click.echo("[3/3] Writing HTML file...")
+
+    exporter = SheetExporter(title=resolved_title)
+    try:
+        exporter.export(midi_file, resolved_output)
+    except OSError as exc:
+        click.echo(f"  ERROR: Could not write HTML file — {exc}", err=True)
+        sys.exit(1)
+    except ValueError as exc:
+        click.echo(f"  ERROR: Could not render score — {exc}", err=True)
+        sys.exit(1)
+
+    click.echo()
+    click.echo(f"Done!  Open '{resolved_output}' in any browser. Use Print → Save as PDF.")

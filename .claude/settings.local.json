@@ -2,7 +2,13 @@
   "permissions": {
     "allow": [
       "WebFetch(domain:python-poetry.org)",
-      "WebFetch(domain:github.com)"
+      "WebFetch(domain:github.com)",
+      "Bash(cat /Users/danishjaved/development/github.com/ambersariya/tubechord/.github/workflows/*.yml)",
+      "Bash(cat /Users/danishjaved/development/github.com/ambersariya/tubechord/.venv/lib/python*/site-packages/music21/version.py)",
+      "Bash(python3 -c \"import music21; print\\(music21.__version__\\)\")",
+      "WebFetch(domain:pypi.org)",
+      "WebFetch(domain:web.mit.edu)",
+      "WebFetch(domain:book.verovio.org)"
     ]
   }
 }
