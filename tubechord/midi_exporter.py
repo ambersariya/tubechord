@@ -4,11 +4,12 @@ from midiutil import MIDIFile
 
 from tubechord.voicing_strategy import VoicedChord
 
-# Track indices — Track 0 is the primary track; notation apps (GarageBand,
-# MuseScore) render it as the top staff (treble clef). Track 1 becomes the
-# bottom staff (bass clef). Standard piano MIDI convention: RH first.
-TRACK_RH = 0  # Right Hand / Chords — top staff  → treble clef
-TRACK_LH = 1  # Left Hand  / Bass   — bottom staff → bass clef
+# In midiutil Format 1 MIDI, track 0 is the conductor/tempo track.
+# Note data written to track 0 is ignored by most players and notation apps.
+# Tracks 1 and 2 are the actual data tracks rendered as staves.
+TRACK_CONDUCTOR = 0  # Tempo/time signature only — never receives notes
+TRACK_RH = 1         # Right Hand / Chords — top staff    → treble clef
+TRACK_LH = 2         # Left Hand  / Bass   — bottom staff → bass clef
 
 # General MIDI channel assignments
 CHANNEL_RH = 0
@@ -19,13 +20,15 @@ class MidiExporter:
     """
     Writes a two-track MIDI file from a list of VoicedChord events.
 
-    Track layout
-    ------------
-    Track 0 — "Right Hand (Chords)"  →  top staff / treble clef
+    Track layout (Format 1, 3 internal tracks)
+    ------------------------------------------
+    Track 0 — conductor track (tempo/time signature only, no notes)
+
+    Track 1 — "Right Hand (Chords)"  →  top staff / treble clef
         Contains the three-note triad produced by the VoicingStrategy.
         Both grade levels populate this track.
 
-    Track 1 — "Left Hand (Bass)"  →  bottom staff / bass clef
+    Track 2 — "Left Hand (Bass)"  →  bottom staff / bass clef
         Contains the left-hand bass note(s) produced by the VoicingStrategy.
         For Grade 1 this track is empty; for Grade 2 it holds the root note
         one octave below the right-hand triad.
@@ -79,21 +82,22 @@ class MidiExporter:
         Raises:
             OSError: If the output file cannot be opened for writing.
         """
-        midi = MIDIFile(numTracks=2, removeDuplicates=False, deinterleave=False)
+        midi = MIDIFile(numTracks=3, removeDuplicates=False, deinterleave=False)
 
-        # --- Track 0: Right Hand (treble clef / top staff) ---
+        # --- Track 0: conductor (tempo only — no notes) ---
+        midi.addTempo(TRACK_CONDUCTOR, 0, self.tempo)
+
+        # --- Track 1: Right Hand (treble clef / top staff) ---
         midi.addTrackName(TRACK_RH, 0, "Right Hand (Chords)")
-        midi.addTempo(TRACK_RH, 0, self.tempo)
 
-        # --- Track 1: Left Hand (bass clef / bottom staff) ---
+        # --- Track 2: Left Hand (bass clef / bottom staff) ---
         midi.addTrackName(TRACK_LH, 0, "Left Hand (Bass)")
-        midi.addTempo(TRACK_LH, 0, self.tempo)
 
         for vc in voiced_chords:
             start_beat = self._seconds_to_beats(vc.event.start_time)
             duration_beats = self._seconds_to_beats(vc.event.duration)
 
-            # Left-hand bass notes → Track 0
+            # Left-hand bass notes → Track 2
             for pitch in vc.left_hand_notes:
                 midi.addNote(
                     track=TRACK_LH,
