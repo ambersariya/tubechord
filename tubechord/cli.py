@@ -11,7 +11,6 @@ from tubechord.chord_analyzer import ChordAnalyzer
 from tubechord.midi_exporter import MidiExporter
 from tubechord.voicing_strategy import Grade1Voicer, Grade2Voicer, VoicingStrategy
 
-
 MAX_GRADE = 8
 
 
