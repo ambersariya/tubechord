@@ -1,0 +1,44 @@
+[project]
+name = "tubechord"
+version = "0.1.0"
+description = "Extract chords from YouTube videos and generate MIDI files for beginner piano players"
+authors = [
+    {name = "Your Name"}
+]
+requires-python = ">=3.10"
+dependencies = [
+    "click>=8.1.0,<9.0.0",
+    "yt-dlp>=2024.1.0",
+    "librosa>=0.10.0,<0.12.0",
+    "midiutil>=1.2.1,<2.0.0",
+    "numpy>=1.24.0",
+    "scipy>=1.10.0",
+]
+
+[project.scripts]
+tubechord = "tubechord.cli:main"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.group.dev.dependencies]
+ruff = ">=0.9.0"
+mypy = ">=1.10.0"
+pytest = ">=8.0.0"
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B"]
+ignore = ["E501"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["tubechord"]
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
+ignore_missing_imports = true
