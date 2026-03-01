@@ -78,6 +78,18 @@ tubechord v0.1.0
 Done!  Open 'output.mid' in GarageBand, MuseScore, or any MIDI player.
 ```
 
+### Render Sheet Music From MIDI
+
+Use the `sheet` subcommand to render notation from any `.mid` file:
+
+```bash
+# Default: self-contained HTML with inline SVG (verovio)
+tubechord sheet my_song.mid
+
+# Markdown with embedded VexFlow renderer
+tubechord sheet my_song.mid --format md-vexflow -o my_song.md
+```
+
 ## Grade Levels Explained
 
 | Grade | Right Hand | Left Hand | MIDI Range |

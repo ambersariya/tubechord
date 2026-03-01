@@ -170,52 +170,79 @@ def extract(url: str, grade: int, output: str | None, tempo: int, min_duration: 
     "-o",
     default=None,
     metavar="PATH",
-    help="Destination HTML file path. Defaults to <MIDI_FILE stem>.html.",
+    help="Destination sheet file path. Defaults to extension based on --format.",
 )
 @click.option(
     "--title",
     default=None,
     metavar="TEXT",
-    help="Title shown in the HTML header. Defaults to the MIDI filename stem.",
+    help="Title shown in the output header. Defaults to the MIDI filename stem.",
 )
-def sheet(midi_file: str, output: str | None, title: str | None) -> None:
+@click.option(
+    "--format",
+    "output_format",
+    type=click.Choice(["html", "md-vexflow"], case_sensitive=False),
+    default="html",
+    show_default=True,
+    help="Sheet output format: self-contained HTML (verovio) or Markdown with VexFlow script.",
+)
+def sheet(
+    midi_file: str,
+    output: str | None,
+    title: str | None,
+    output_format: str,
+) -> None:
     """
-    Render a MIDI file as a self-contained HTML file with SVG sheet music.
+    Render a MIDI file as sheet music output (HTML or Markdown).
 
-    MIDI_FILE is the path to an existing .mid file. Open the resulting HTML
-    in any browser to view the score; use the browser's Print dialog to export
-    as PDF.
+    MIDI_FILE is the path to an existing .mid file.
+    - html: self-contained file with inline SVG sheet music.
+    - md-vexflow: markdown with embedded VexFlow JavaScript renderer.
 
     \b
     Examples:
       tubechord sheet my_song.mid
       tubechord sheet my_song.mid -o score.html --title "My Song"
+      tubechord sheet my_song.mid --format md-vexflow -o score.md
     """
     from tubechord.sheet_exporter import SheetExporter
 
     midi_path = Path(midi_file)
     resolved_title = title if title is not None else midi_path.stem.replace("_", " ")
-    resolved_output = output if output is not None else str(midi_path.with_suffix(".html"))
+    normalized_format = output_format.lower()
+    default_suffix = ".html" if normalized_format == "html" else ".md"
+    resolved_output = output if output is not None else str(midi_path.with_suffix(default_suffix))
 
     click.echo(f"tubechord v{__version__}")
     click.echo(f"  MIDI   : {midi_file}")
+    click.echo(f"  Format : {normalized_format}")
     click.echo(f"  Title  : {resolved_title}")
     click.echo(f"  Output : {resolved_output}")
     click.echo()
 
-    click.echo("[1/3] Parsing MIDI with music21...")
-    click.echo("[2/3] Rendering notation to SVG with verovio...")
-    click.echo("[3/3] Writing HTML file...")
+    if normalized_format == "html":
+        click.echo("[1/3] Parsing MIDI with music21...")
+        click.echo("[2/3] Rendering notation to SVG with verovio...")
+        click.echo("[3/3] Writing HTML file...")
+    else:
+        click.echo("[1/3] Parsing MIDI with music21...")
+        click.echo("[2/3] Building VexFlow score payload...")
+        click.echo("[3/3] Writing Markdown file...")
 
-    exporter = SheetExporter(title=resolved_title)
+    exporter = SheetExporter(title=resolved_title, output_format=normalized_format)
     try:
         exporter.export(midi_file, resolved_output)
     except OSError as exc:
-        click.echo(f"  ERROR: Could not write HTML file — {exc}", err=True)
+        click.echo(f"  ERROR: Could not write output file — {exc}", err=True)
         sys.exit(1)
     except ValueError as exc:
         click.echo(f"  ERROR: Could not render score — {exc}", err=True)
         sys.exit(1)
 
     click.echo()
-    click.echo(f"Done!  Open '{resolved_output}' in any browser. Use Print → Save as PDF.")
+    if normalized_format == "html":
+        click.echo(f"Done!  Open '{resolved_output}' in any browser. Use Print → Save as PDF.")
+    else:
+        click.echo(
+            f"Done!  Open '{resolved_output}' in a Markdown viewer that allows embedded JavaScript."
+        )

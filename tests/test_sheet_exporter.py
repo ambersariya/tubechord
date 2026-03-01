@@ -82,6 +82,11 @@ def test_build_html_is_valid_html_skeleton() -> None:
     assert "</body>" in html
 
 
+def test_init_rejects_unsupported_output_format() -> None:
+    with pytest.raises(ValueError, match="Unsupported output format"):
+        SheetExporter(output_format="pdf")
+
+
 # ---------------------------------------------------------------------------
 # Integration tests — require a real .mid file and music21 + verovio installed.
 # Skip these in CI unless explicitly opted in with -m integration.
