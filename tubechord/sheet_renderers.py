@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 from abc import ABC, abstractmethod
 from dataclasses import asdict
+from typing import Any, cast
 
 from tubechord.sheet_models import ScoreDocument
 
@@ -88,10 +89,22 @@ class VerovioHtmlRenderer(SheetRenderer):
             raise ValueError("verovio could not load the MusicXML data.")
 
         page_count: int = tk.getPageCount()
-        return [
-            tk.renderToSVG(pageNo=page_no, xmlDeclaration=False)
-            for page_no in range(1, page_count + 1)
-        ]
+        return [self._render_page_svg(tk, page_no) for page_no in range(1, page_count + 1)]
+
+    def _render_page_svg(self, toolkit: Any, page_no: int) -> str:
+        """
+        Render one page to SVG with compatibility for multiple verovio bindings.
+
+        Some versions accept keyword arguments, while others only accept
+        positional arguments.
+        """
+        try:
+            return cast(str, toolkit.renderToSVG(pageNo=page_no, xmlDeclaration=False))
+        except TypeError:
+            try:
+                return cast(str, toolkit.renderToSVG(page_no, False))
+            except TypeError:
+                return cast(str, toolkit.renderToSVG(page_no))
 
     def build_html(self, title: str, svgs: list[str]) -> str:
         """
