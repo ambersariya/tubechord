@@ -1,11 +1,14 @@
 """ChordAnalyzer: Maps chroma energy vectors to Major/Minor triad events."""
 
 from dataclasses import dataclass
+from typing import Any
 
 import numpy as np
+import numpy.typing as npt
 
 # Chromatic pitch class names (index 0 = C)
 NOTE_NAMES: list[str] = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
+FloatArray = npt.NDArray[np.floating[Any]]
 
 
 @dataclass
@@ -59,8 +62,8 @@ class ChordAnalyzer:
        discarded as noise.
     """
 
-    MINOR_THIRD = 3   # semitones above root for minor 3rd
-    MAJOR_THIRD = 4   # semitones above root for major 3rd
+    MINOR_THIRD = 3  # semitones above root for minor 3rd
+    MAJOR_THIRD = 4  # semitones above root for major 3rd
 
     def __init__(
         self,
@@ -81,7 +84,7 @@ class ChordAnalyzer:
     # Private helpers
     # ------------------------------------------------------------------
 
-    def _smooth_chroma(self, chroma: np.ndarray) -> np.ndarray:
+    def _smooth_chroma(self, chroma: FloatArray) -> FloatArray:
         """
         Apply a uniform (box) filter along the time axis of the chromagram.
 
@@ -102,7 +105,7 @@ class ChordAnalyzer:
             arr=chroma,
         )
 
-    def _detect_frame_chord(self, chroma_frame: np.ndarray) -> tuple[int, str]:
+    def _detect_frame_chord(self, chroma_frame: FloatArray) -> tuple[int, str]:
         """
         Identify the (root, chord_type) for a single 12-element chroma vector.
 
@@ -124,7 +127,7 @@ class ChordAnalyzer:
     # Public API
     # ------------------------------------------------------------------
 
-    def analyze(self, chroma: np.ndarray, hop_duration: float) -> list[ChordEvent]:
+    def analyze(self, chroma: FloatArray, hop_duration: float) -> list[ChordEvent]:
         """
         Analyse a chromagram and return a deduplicated list of chord events.
 

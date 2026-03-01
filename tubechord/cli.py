@@ -35,6 +35,7 @@ def _title_to_filename(title: str) -> str:
 
 # ── CLI group ──────────────────────────────────────────────────────────────────
 
+
 @click.group(context_settings={"help_option_names": ["-h", "--help"]})
 @click.version_option(version=__version__, prog_name="tubechord")
 def main() -> None:
@@ -42,6 +43,7 @@ def main() -> None:
 
 
 # ── extract subcommand ─────────────────────────────────────────────────────────
+
 
 @main.command()
 @click.argument("url")
@@ -123,8 +125,10 @@ def extract(url: str, grade: int, output: str | None, tempo: int, min_duration: 
             click.echo(f"  ERROR: Could not download audio — {exc}", err=True)
             sys.exit(1)
 
-        click.echo(f"      Chroma shape : {chroma.shape[1]} frames  "
-                   f"({chroma.shape[1] * hop_duration:.1f} s)")
+        click.echo(
+            f"      Chroma shape : {chroma.shape[1]} frames  "
+            f"({chroma.shape[1] * hop_duration:.1f} s)"
+        )
 
         # ── Step 2: Analyse chords ──────────────────────────────────────
         click.echo("[2/4] Analysing chord sequence...")
@@ -162,6 +166,7 @@ def extract(url: str, grade: int, output: str | None, tempo: int, min_duration: 
 
 
 # ── sheet subcommand ───────────────────────────────────────────────────────────
+
 
 @main.command()
 @click.argument("midi_file", type=click.Path(exists=True, dir_okay=False, readable=True))

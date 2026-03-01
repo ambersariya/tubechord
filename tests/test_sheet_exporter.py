@@ -92,14 +92,13 @@ def test_init_rejects_unsupported_output_format() -> None:
 # Skip these in CI unless explicitly opted in with -m integration.
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.integration
 def test_export_creates_html_file(tmp_path: pytest.TempPathFactory) -> None:
     """Smoke test: export() produces a non-empty HTML file."""
     import os
-    mid_files = [
-        f for f in os.listdir(".")
-        if f.endswith(".mid")
-    ]
+
+    mid_files = [f for f in os.listdir(".") if f.endswith(".mid")]
     if not mid_files:
         pytest.skip("No .mid file found in working directory for integration test.")
 

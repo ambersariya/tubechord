@@ -37,10 +37,10 @@ class VerovioHtmlRenderer(SheetRenderer):
     """Render MusicXML bytes into a self-contained HTML document with inline SVG."""
 
     # Verovio A4 layout constants (verovio abstract units; ~1 unit ≈ 0.1 mm)
-    _PAGE_HEIGHT: int = 2970   # A4 portrait height
-    _PAGE_WIDTH: int = 2100    # A4 portrait width
-    _SCALE: int = 40           # 40% — fits grand staff comfortably on A4
-    _PAGE_MARGIN: int = 100    # uniform margin on all four sides
+    _PAGE_HEIGHT: int = 2970  # A4 portrait height
+    _PAGE_WIDTH: int = 2100  # A4 portrait width
+    _SCALE: int = 40  # 40% — fits grand staff comfortably on A4
+    _PAGE_MARGIN: int = 100  # uniform margin on all four sides
 
     @property
     def default_extension(self) -> str:
@@ -69,17 +69,19 @@ class VerovioHtmlRenderer(SheetRenderer):
         import verovio
 
         tk = verovio.toolkit()
-        tk.setOptions({
-            "pageHeight": self._PAGE_HEIGHT,
-            "pageWidth": self._PAGE_WIDTH,
-            "scale": self._SCALE,
-            "pageMarginTop": self._PAGE_MARGIN,
-            "pageMarginBottom": self._PAGE_MARGIN,
-            "pageMarginLeft": self._PAGE_MARGIN,
-            "pageMarginRight": self._PAGE_MARGIN,
-            "adjustPageHeight": True,
-            "font": "Leipzig",
-        })
+        tk.setOptions(
+            {
+                "pageHeight": self._PAGE_HEIGHT,
+                "pageWidth": self._PAGE_WIDTH,
+                "scale": self._SCALE,
+                "pageMarginTop": self._PAGE_MARGIN,
+                "pageMarginBottom": self._PAGE_MARGIN,
+                "pageMarginLeft": self._PAGE_MARGIN,
+                "pageMarginRight": self._PAGE_MARGIN,
+                "adjustPageHeight": True,
+                "font": "Leipzig",
+            }
+        )
 
         loaded: bool = tk.loadData(musicxml_bytes.decode("utf-8"))
         if not loaded:

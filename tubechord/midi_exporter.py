@@ -8,8 +8,8 @@ from tubechord.voicing_strategy import VoicedChord
 # Note data written to track 0 is ignored by most players and notation apps.
 # Tracks 1 and 2 are the actual data tracks rendered as staves.
 TRACK_CONDUCTOR = 0  # Tempo/time signature only — never receives notes
-TRACK_RH = 1         # Right Hand / Chords — top staff    → treble clef
-TRACK_LH = 2         # Left Hand  / Bass   — bottom staff → bass clef
+TRACK_RH = 1  # Right Hand / Chords — top staff    → treble clef
+TRACK_LH = 2  # Left Hand  / Bass   — bottom staff → bass clef
 
 # General MIDI channel assignments
 CHANNEL_RH = 0
@@ -42,9 +42,9 @@ class MidiExporter:
     converted to beats using: beats = seconds × (tempo / 60).
     """
 
-    DEFAULT_TEMPO = 80     # BPM — a comfortable practice tempo
+    DEFAULT_TEMPO = 80  # BPM — a comfortable practice tempo
     DEFAULT_VELOCITY = 80  # MIDI velocity for right-hand notes  (0-127)
-    BASS_VELOCITY = 68     # Slightly softer left-hand bass notes
+    BASS_VELOCITY = 68  # Slightly softer left-hand bass notes
 
     def __init__(
         self,

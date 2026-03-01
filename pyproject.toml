@@ -43,7 +43,8 @@ known-first-party = ["tubechord"]
 [tool.mypy]
 python_version = "3.10"
 strict = true
-ignore_missing_imports = true
+ignore_missing_imports = false
+mypy_path = "typings"
 
 [tool.pytest.ini_options]
 markers = [

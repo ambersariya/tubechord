@@ -41,7 +41,9 @@ class SheetExporter:
         normalized = output_format.strip().lower()
         if normalized not in SUPPORTED_FORMATS:
             supported = ", ".join(sorted(SUPPORTED_FORMATS))
-            raise ValueError(f"Unsupported output format '{output_format}'. Use one of: {supported}.")
+            raise ValueError(
+                f"Unsupported output format '{output_format}'. Use one of: {supported}."
+            )
         self.output_format = normalized
         self.renderer = self._build_renderer(normalized)
 

@@ -54,6 +54,7 @@ MINOR_INTERVALS: list[int] = [0, 3, 7]
 
 # ── Abstract base ────────────────────────────────────────────────────────────
 
+
 class VoicingStrategy(ABC):
     """
     Abstract Strategy for assigning MIDI pitches to a detected chord.
@@ -80,6 +81,7 @@ class VoicingStrategy(ABC):
 
 
 # ── Concrete strategies ──────────────────────────────────────────────────────
+
 
 class Grade1Voicer(VoicingStrategy):
     """

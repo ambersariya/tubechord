@@ -3,10 +3,15 @@
 import os
 import shutil
 import tempfile
+from types import TracebackType
+from typing import Any
 
 import librosa
 import numpy as np
+import numpy.typing as npt
 import yt_dlp
+
+FloatArray = npt.NDArray[np.floating[Any]]
 
 
 class AudioProcessor:
@@ -86,7 +91,7 @@ class AudioProcessor:
 
         return wav_path
 
-    def extract_chroma(self, audio_path: str) -> tuple[np.ndarray, float, float]:
+    def extract_chroma(self, audio_path: str) -> tuple[FloatArray, float, float]:
         """
         Load an audio file and compute its chroma STFT representation.
 
@@ -112,7 +117,7 @@ class AudioProcessor:
         hop_duration = self.hop_length / sr
         return chroma, float(sr), hop_duration
 
-    def process(self, url: str) -> tuple[np.ndarray, float]:
+    def process(self, url: str) -> tuple[FloatArray, float]:
         """
         Full pipeline: download audio from YouTube and return its chromagram.
 
@@ -140,5 +145,10 @@ class AudioProcessor:
     def __enter__(self) -> "AudioProcessor":
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
         self.cleanup()
